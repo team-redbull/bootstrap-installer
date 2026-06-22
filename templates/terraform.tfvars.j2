@@ -16,6 +16,8 @@ vsphere_folder            = "{{ vsphere_folder }}"
 vm_template               = "{{ vm_template }}"
 vm_network                = "{{ vm_network }}"
 vm_dns_addresses          = [{{ dns_servers | map('tojson') | join(', ') }}]
+vsphere_required_tag_category = "{{ vsphere_required_tag_category | default('') }}"
+vsphere_required_tag_name     = "{{ vsphere_required_tag_name | default('') }}"
 
 # Cluster Identity
 cluster_id     = "{{ cluster_name }}"

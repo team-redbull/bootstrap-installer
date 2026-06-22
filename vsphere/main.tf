@@ -39,6 +39,17 @@ provider "vsphere" {
   allow_unverified_ssl = true
 }
 
+data "vsphere_tag_category" "required" {
+  count = var.vsphere_required_tag_name != "" ? 1 : 0
+  name  = var.vsphere_required_tag_category
+}
+
+data "vsphere_tag" "required" {
+  count       = var.vsphere_required_tag_name != "" ? 1 : 0
+  name        = var.vsphere_required_tag_name
+  category_id = data.vsphere_tag_category.required[0].id
+}
+
 data "vsphere_datacenter" "dc" {
   name = var.vsphere_datacenter
 }
@@ -78,6 +89,16 @@ resource "vsphere_folder" "folder" {
 resource "vsphere_resource_pool" "resources_pool" {
   name = var.cluster_id
   parent_resource_pool_id = data.vsphere_compute_cluster.compute_cluster.resource_pool_id
+
+  lifecycle {
+    precondition {
+      condition = var.vsphere_required_tag_name == "" || contains(
+        tolist(data.vsphere_compute_cluster.compute_cluster.tags),
+        data.vsphere_tag.required[0].id
+      )
+      error_message = "Cluster '${var.vsphere_cluster}' does not have required tag '${var.vsphere_required_tag_name}' (category '${var.vsphere_required_tag_category}'). Provisioning aborted."
+    }
+  }
 }
 
 module "bootstrap" {

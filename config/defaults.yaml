@@ -72,6 +72,12 @@ terraform_bin: /usr/local/bin/terraform
 # no internet access needed after cloning.
 terraform_plugin_dir: ./providers
 
+# --- vSphere tag guard -------------------------------------------------------
+# If set, terraform will abort if vsphere_cluster lacks this tag.
+# Leave empty to skip the check.
+vsphere_required_tag_category: ""
+vsphere_required_tag_name: ""
+
 # --- APIs --------------------------------------------------------------------
 # Wildcard DNS API (*.apps records; api/api-int handled by Terraform exec provisioner)
 wildcard_dns_api_url: http://dns-api.example.local:8080/api/wildcard

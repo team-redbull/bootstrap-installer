@@ -42,6 +42,18 @@ variable "vsphere_folder" {
   description = "vSphere VM folder path (cluster folder will be created inside this)."
 }
 
+variable "vsphere_required_tag_category" {
+  type        = string
+  default     = ""
+  description = "Tag category name that the compute cluster must have. Empty = no check."
+}
+
+variable "vsphere_required_tag_name" {
+  type        = string
+  default     = ""
+  description = "Tag name within vsphere_required_tag_category the cluster must carry. Empty = no check."
+}
+
 variable "vm_network" {
   type        = string
   description = "vSphere port group name for the cluster network."
