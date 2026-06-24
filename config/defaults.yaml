@@ -75,8 +75,8 @@ terraform_plugin_dir: ./providers
 # --- vSphere tag guard -------------------------------------------------------
 # If set, terraform will abort if vsphere_cluster lacks this tag.
 # Leave empty to skip the check.
-vsphere_required_tag_category: ""
-vsphere_required_tag_name: ""
+vsphere_required_tag_category: "is_nvm_Allowed"
+vsphere_required_tag_name: "yes"
 
 # --- APIs --------------------------------------------------------------------
 # Wildcard DNS API (*.apps records; api/api-int handled by Terraform exec provisioner)
