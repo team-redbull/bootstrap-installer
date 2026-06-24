@@ -392,6 +392,66 @@ git commit -m "Update Terraform providers to <version>"
 
 ---
 
+## Running with Docker (Recommended for Airgap)
+
+Packaging as a container image bundles Python, all binaries, and Terraform providers into a single transferable artifact — no manual dependency installation on the bastion host.
+
+### 1. Prepare OCP binaries (internet-connected machine)
+
+The `openshift-install` and `oc` binaries are not committed to this repo. Download them from your mirror registry and place them in `bin/` at the repo root before building:
+
+```
+bin/
+  openshift-install-4.20    ← from your mirror (linux/amd64)
+  oc                        ← from OCP client tarball (linux/amd64)
+```
+
+### 2. Build the image
+
+```bash
+docker build -t ocp-bootstrap:4.20 .
+```
+
+### 3. Transfer to airgap environment
+
+```bash
+# Save on internet-connected machine
+docker save ocp-bootstrap:4.20 | gzip > ocp-bootstrap-4.20.tar.gz
+
+# Copy tar to airgap bastion host, then load it there
+docker load < ocp-bootstrap-4.20.tar.gz
+```
+
+### 4. Run in the airgap environment
+
+Mount `config/` (cluster YAMLs + secrets) and `clusters/` (output artifacts) as volumes so they persist outside the container:
+
+```bash
+docker run --rm \
+  -e VSPHERE_PASSWORD="your-vcenter-password" \
+  -v $(pwd)/config:/app/config \
+  -v $(pwd)/clusters:/app/clusters \
+  ocp-bootstrap:4.20 --config config/clusters/<name>.yaml
+```
+
+All `bootstrap.py` flags work as normal:
+
+```bash
+# Generate configs only (no VMs)
+docker run --rm -e VSPHERE_PASSWORD="..." \
+  -v $(pwd)/config:/app/config -v $(pwd)/clusters:/app/clusters \
+  ocp-bootstrap:4.20 --config config/clusters/<name>.yaml --skip-terraform
+
+# Destroy a cluster
+docker run --rm -e VSPHERE_PASSWORD="..." \
+  -v $(pwd)/config:/app/config -v $(pwd)/clusters:/app/clusters \
+  ocp-bootstrap:4.20 --config config/clusters/<name>.yaml --destroy
+```
+
+Place `config/pull-secret.json` and `config/additional-trust-bundle.pem` on the bastion host before running — they are mounted in via the `config/` volume and are never baked into the image.
+
+---
+
 ## After Bootstrap
 
 ```bash

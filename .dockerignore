@@ -1,0 +1,8 @@
+.git
+.claude
+clusters/*/auth
+clusters/**/*.log
+config/pull-secret.json
+config/additional-trust-bundle.pem
+__pycache__
+*.pyc
