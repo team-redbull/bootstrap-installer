@@ -52,11 +52,11 @@ def build_template_context(
     if trust_bundle_path.exists():
         additional_trust_bundle = trust_bundle_path.read_text().strip()
 
-    vm_network = profile.get("vm_network")
-    if not vm_network:
+    vpc_id = profile.get("vpc_id")
+    if not vpc_id:
         raise ValueError(
-            "vm_network is required in the cluster config "
-            "(e.g. vm_network: VLAN105-OCP)"
+            "vpc_id is required in the site/cluster config "
+            "(the existing VPC the subnet is created in, e.g. vpc_id: vpc-0abc123)"
         )
 
     return {
@@ -66,12 +66,11 @@ def build_template_context(
         **ip_info,
         "segment": segment,
         "vlan_id": vlan_id,
-        "vm_network": vm_network,
+        "vpc_id": vpc_id,
         "ignition_dir": str(cluster_dir / "ignition"),
         "pull_secret": pull_secret,
         "ssh_key": ssh_key,
         "additional_trust_bundle": additional_trust_bundle,
-        "vcenter_password": profile.get("vcenter_password", ""),
         # Networking defaults — override in site profile if needed
         "cluster_network_cidr": profile.get("cluster_network_cidr", "10.132.0.0/14"),
         "cluster_network_host_prefix": profile.get("cluster_network_host_prefix", 23),

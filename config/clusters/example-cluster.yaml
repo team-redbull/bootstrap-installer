@@ -2,29 +2,32 @@
 # Inherits: config/defaults.yaml → config/sites/<site>.yaml → this file (wins)
 
 cluster_name: my-cluster-01
-site: site-a
+site: aws-site
 
 # Network
-segment: 10.0.5.0/24   # CIDR for this cluster; omit to auto-allocate via VLAN Manager
-vm_network: VLAN105-OCP # vSphere port group (EPG) for this cluster's VMs
+# segment = the subnet CIDR Terraform creates inside the VPC.
+# Must be free within the VPC and not overlap other subnets.
+segment: 10.0.5.0/24
+
+# Optional: override the site's AZ / VPC / AMI for this cluster
+# availability_zone: us-east-1b
+# rhcos_ami: ami-xxxxxxxxxxxxxxxxx
 
 # Optional: compute nodes (workers)
 # By default no compute nodes are created — infra nodes handle all workloads.
-# Uncomment to add dedicated compute VMs (IPs are offsets from the segment address).
-# compute_ip_offsets: [8, 9, 10]   # 3 compute nodes at .8, .9, .10
-# compute_num_cpus: 4
-# compute_memory: 8192             # MB
-# compute_disk_size: 120           # GB
+# Uncomment to add dedicated compute instances (IPs are offsets from the subnet address).
+# compute_ip_offsets: [40, 41, 42]      # 3 compute nodes at .40, .41, .42
+# compute_instance_type: m5.xlarge
+# compute_disk_size: 120                # GB
 
 # Optional: override any site or global default for this specific cluster
-# wildcard_dns_api_url: http://other-dns-api/api/wildcard
+# control_plane_instance_type: m5.4xlarge
 # openshift_install_bin: /usr/local/bin/openshift-install-4.21
-# terraform_dir: /opt/ocp-terraform-dev
 
 # Optional: ArgoCD hub registration
 # When set, automatically registers this cluster in the hub ArgoCD after provisioning.
 # argocd_hub_api_url: https://api.hub-cluster.example.com:6443
-# argocd_hub_token: <sa-token-plain-text>      # plain text token (recommended for disconnected git repos)
+# argocd_hub_token: <sa-token-plain-text>      # plain text token
 # argocd_hub_token_env: HUB_CLUSTER_SA_TOKEN   # alternative: env var name (omit argocd_hub_token if using this)
 # argocd_namespace: argocd                     # optional, default: argocd
 # argocd_insecure_skip_tls: false              # optional, default: false

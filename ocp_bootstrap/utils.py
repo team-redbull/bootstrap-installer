@@ -96,4 +96,14 @@ def validate_prerequisites(
             logger.error(m)
         sys.exit(1)
 
+    if not getattr(args, "skip_terraform", False):
+        have_creds = os.environ.get("AWS_ACCESS_KEY_ID") or os.environ.get("AWS_PROFILE")
+        if not have_creds:
+            logger.warning(
+                "No AWS credentials in environment (AWS_ACCESS_KEY_ID or AWS_PROFILE). "
+                "Terraform will fail to reach AWS unless credentials are configured."
+            )
+        if not profile.get("aws_region"):
+            logger.warning("aws_region not set in the site/cluster config")
+
     logger.info("Pre-flight check passed (all required binaries found)")

@@ -1,0 +1,16 @@
+{
+  "archives": {
+    "darwin_arm64": {
+      "hashes": [
+        "h1:jXGWXG+8Jau8sewr87e1WzJjGou29yfCsNbT7V3Ujw4="
+      ],
+      "url": "terraform-provider-ignition_2.7.2_darwin_arm64.zip"
+    },
+    "linux_amd64": {
+      "hashes": [
+        "h1:Hiq2N/zAO4KOsfE1ED21LyEY8JUpayOnnc09V9BBtGw="
+      ],
+      "url": "terraform-provider-ignition_2.7.2_linux_amd64.zip"
+    }
+  }
+}

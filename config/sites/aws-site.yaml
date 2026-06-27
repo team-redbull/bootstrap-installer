@@ -1,0 +1,24 @@
+# Site Profile: aws-site
+# Only site-specific values — everything else is inherited from config/defaults.yaml
+
+site_name: aws-site
+
+# --- AWS ---------------------------------------------------------------------
+aws_region: us-east-1
+vpc_id: vpc-xxxxxxxxxxxxxxxxx       # existing VPC the subnet is created in
+availability_zone: us-east-1a
+rhcos_ami: ami-xxxxxxxxxxxxxxxxx    # RHCOS 4.20 AMI for this region
+aws_ssh_key_name: my-keypair        # optional EC2 key pair for SSH
+allowed_cidrs:                      # internal CIDRs allowed to reach api (6443) / ingress (80/443) / ssh
+  - 10.0.0.0/8
+# route_table_id: rtb-xxxxxxxx      # optional: associate the subnet with an existing route
+#                                   #   table. It must provide OUTBOUND internet (NAT) so nodes
+#                                   #   can pull images. If omitted, the VPC main route table applies.
+
+# --- DNS ---------------------------------------------------------------------
+# The cluster is PRIVATE. Terraform creates a private Route53 hosted zone for
+# <cluster>.<base_domain> attached to the VPC — no public zone is used or required.
+base_domain: ocp.example.com
+
+# AWS credentials come from the environment (AWS_ACCESS_KEY_ID /
+# AWS_SECRET_ACCESS_KEY or AWS_PROFILE) — no value needed here.

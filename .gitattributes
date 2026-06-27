@@ -1,1 +1,2 @@
 utils_bin/* filter=lfs diff=lfs merge=lfs -text
+aws/providers/**/*.zip filter=lfs diff=lfs merge=lfs -text

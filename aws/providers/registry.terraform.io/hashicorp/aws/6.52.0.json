@@ -1,0 +1,16 @@
+{
+  "archives": {
+    "darwin_arm64": {
+      "hashes": [
+        "h1:lpXqosKH8yAahK3SA1P5Pdy1ziXJcY+blUidY0q9yGk="
+      ],
+      "url": "terraform-provider-aws_6.52.0_darwin_arm64.zip"
+    },
+    "linux_amd64": {
+      "hashes": [
+        "h1:Dg9X3Gde96OCT3TovLKAKumnR64VqIIQ37m/9NRJ00Y="
+      ],
+      "url": "terraform-provider-aws_6.52.0_linux_amd64.zip"
+    }
+  }
+}

@@ -15,23 +15,20 @@ venv/
 *.tfstate.backup
 tfplan
 # Note: .terraform.lock.hcl is intentionally NOT ignored — commit it for reproducibility
-# Note: vsphere/providers/ is intentionally NOT ignored — provider binaries are committed
-#       for disconnected/airgap environments (terraform init -plugin-dir=./providers)
+# Note: aws/providers/ is intentionally NOT ignored — provider zips are pre-downloaded
+#       (committed via Git LFS) so terraform init uses the local filesystem mirror.
 
-# Terraform state in the vsphere working dir (the per-cluster states live in clusters/ and ARE tracked)
-vsphere/terraform.tfstate
+# Terraform state in the aws working dir (the per-cluster states live in clusters/ and ARE tracked)
+aws/terraform.tfstate
 
 # Generated terraform.tfvars (written by bootstrap; may contain credentials)
-vsphere/terraform.tfvars
-# Generated at runtime by bootstrap tool (filesystem_mirror CLI config)
-**/.providers.tfrc
+aws/terraform.tfvars
 
 # Binaries — utils_bin/ is intentionally NOT ignored — large files are tracked via Git LFS
 # (.gitattributes: utils_bin/* filter=lfs diff=lfs merge=lfs -text)
 
 # Sensitive config files — drop these in config/ but never commit them
 config/pull-secret.json
-config/additional-trust-bundle.pem
 
 # Cluster output lives in clusters/<name>/ (default work dir is inside this repo).
 # Credentials are excluded; everything else (tfstate, ignition, configs) is tracked

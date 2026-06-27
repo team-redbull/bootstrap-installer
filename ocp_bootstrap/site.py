@@ -34,7 +34,7 @@ def load_site_profile(site: str) -> Dict[str, Any]:
 
     profile.update(site_data)
 
-    # 3. Resolve *_env keys (e.g. vcenter_password_env: VSPHERE_PASSWORD)
+    # 3. Resolve *_env keys (e.g. argocd_hub_token_env: HUB_CLUSTER_SA_TOKEN)
     for key, value in list(profile.items()):
         if key.endswith("_env"):
             env_var = value

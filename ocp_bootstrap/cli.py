@@ -10,9 +10,8 @@ import yaml
 from .argocd import register_cluster_in_argocd
 from .constants import DEFAULT_WORK_DIR, CLUSTERS_DIR, TERRAFORM_DIR
 from .csr import approve_csrs
-from .dns import create_wildcard_dns_via_api
 from .installer import create_ignition_configs, create_manifests, inject_v4_internal_subnet
-from .network import allocate_vlan, calculate_ips
+from .network import calculate_ips
 from .renderer import build_template_context, render_templates
 from .site import load_site_profile
 from .terraform import run_terraform, run_terraform_destroy
@@ -58,11 +57,10 @@ class ClusterCtx:
 # ---------------------------------------------------------------------------
 
 def parse_args() -> argparse.Namespace:
-    p = argparse.ArgumentParser(description="Bootstrap OpenShift 4.20 UPI on vSphere (disconnected)")
+    p = argparse.ArgumentParser(description="Bootstrap OpenShift 4.20 UPI on AWS EC2")
     p.add_argument("--config", required=True, help="Cluster YAML (config/clusters/<name>.yaml)")
     p.add_argument("--work-dir", default=str(DEFAULT_WORK_DIR), help=f"Output directory (default: {DEFAULT_WORK_DIR})")
     p.add_argument("--destroy", action="store_true", help="Destroy the cluster (terraform destroy)")
-    p.add_argument("--skip-dns", action="store_true", help="Skip wildcard DNS creation")
     p.add_argument("--skip-terraform", action="store_true", help="Skip terraform (generate configs only)")
     p.add_argument("--skip-csr", action="store_true", help="Skip CSR approval loop")
     p.add_argument("--skip-ignition", action="store_true", help="Skip openshift-install (use existing ignition)")
@@ -140,12 +138,11 @@ def _run_destroy(ctx: ClusterCtx) -> None:
 
 def _run_network(ctx: ClusterCtx) -> None:
     if not ctx.segment:
-        ctx.segment, ctx.vlan_id = allocate_vlan(
-            cluster_name=ctx.name, site=ctx.site,
-            vlan_manager_url=ctx.profile["vlan_manager_url"],
-            vrf=ctx.profile.get("vlan_manager_vrf", "default"),
-            logger=ctx.logger,
+        ctx.logger.error(
+            "'segment' is required in the cluster config — it is the subnet CIDR "
+            "Terraform creates in the VPC (e.g. segment: 10.0.5.0/24)"
         )
+        sys.exit(1)
     ctx.ip_info = calculate_ips(ctx.segment, ctx.profile, ctx.logger)
 
 
@@ -165,21 +162,6 @@ def _run_ignition(ctx: ClusterCtx, args) -> None:
     create_manifests(install_bin, ctx.install_dir, ctx.logger)
     inject_v4_internal_subnet(ctx.template_outputs["v4-internal-subnet"], ctx.install_dir, ctx.logger)
     create_ignition_configs(install_bin, ctx.install_dir, ctx.ignition_dir, ctx.logger)
-
-
-def _run_dns(ctx: ClusterCtx, args) -> None:
-    if args.skip_dns:
-        ctx.logger.info("Skipping DNS (--skip-dns)")
-        return
-    url = ctx.profile.get("wildcard_dns_api_url")
-    if not url:
-        ctx.logger.error("wildcard_dns_api_url not set — configure it in the site or cluster config")
-        sys.exit(1)
-    try:
-        create_wildcard_dns_via_api(ctx.name, url, ctx.logger)
-    except RuntimeError as e:
-        ctx.logger.error(str(e))
-        ctx.logger.error("Retry later with --skip-ignition --skip-terraform")
 
 
 def _run_csr(ctx: ClusterCtx, args) -> None:
@@ -220,7 +202,7 @@ def _save_context(ctx: ClusterCtx) -> None:
 {'='*70}
 
   Site:          {ctx.profile.get('site_name', ctx.site)}
-  Segment:       {ctx.segment}  (gateway: {ctx.ip_info.get('gateway', '')})
+  Segment:       {ctx.segment}
   Control Plane: {', '.join(ctx.ip_info.get('control_plane_ips', []))}
   Infra Nodes:   {', '.join(ctx.ip_info.get('infra_ips', []))}
   Compute Nodes: {compute}
@@ -248,6 +230,5 @@ def main() -> None:
     _run_network(ctx)
     _run_templates(ctx)
     _run_ignition(ctx, args)
-    _run_dns(ctx, args)
     _run_terraform(ctx, args)
     _save_context(ctx)
